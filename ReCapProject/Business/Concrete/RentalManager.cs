@@ -1,60 +1,60 @@
 ﻿using Business.Abstract;
 using Business.Constants;
-using Core.Utilities.Results;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Business.Concrete
 {
     public class RentalManager : IRentalService
     {
-        IRentalDal _rentalDal;
-        public RentalManager(IRentalDal rentalDal)
+        IRentalDAL _rentalDAL;
+        public RentalManager(IRentalDAL rentalDAL)
         {
-            _rentalDal = rentalDal;
+            _rentalDAL = rentalDAL;
         }
+        [ValidationAspect(typeof(RentalValidator))]
         public IResult Add(Rental rental)
         {
-            var result = _rentalDal.GetRentalDetails(x => x.CarId == rental.CarId);
-            if (result.Count==0)
-            {
-               // araba id'si mevcutsa silinene kadar eklenmeyecek.
-                    _rentalDal.Add(rental);
-                    return new SuccessResult(Messages.RentalAdded);
-                
-                
-            }
-            return new ErrorResult();
-          
+            _rentalDAL.Add(rental);
+            return new SuccessResult();
         }
-
         public IResult Delete(Rental rental)
         {
-          
-            if (DateTime.Now.Day == rental.ReturnDate.Day)
+            _rentalDAL.Delete(rental);
+            return new SuccessResult();
+        }
+        [ValidationAspect(typeof(RentalValidator))]
+        public IResult Update(Rental rental)
+        {
+            _rentalDAL.Update(rental);
+            return new SuccessResult();
+        }
+        public IDataResult<List<Rental>> GetRentals()
+        {
+            return new SuccessDataResult<List<Rental>>(_rentalDAL.GetAll());
+        }
+        public IDataResult<Rental> GetById(int id)
+        {
+            return new SuccessDataResult<Rental>(_rentalDAL.Get(r => r.Id == id));
+        }
+        public IDataResult<List<RentalDetailDto>> GetRentalDetails()
+        {
+            if (DateTime.Now.Hour == 02)
             {
-                //Belirlenen tarihe gelince delete fonksiyonu çalışacak
-                _rentalDal.Delete(rental);
-                return new SuccessResult();
-                
+                return new ErrorDataResult<List<RentalDetailDto>>(Messages.MaintenanceTime);
             }
-            return new ErrorResult();
+            return new SuccessDataResult<List<RentalDetailDto>>(_rentalDAL.GetRentalDetails());
         }
-
-        public IDataResult<List<Rental>> GetAll()
-        {
-            return new SuccessDataResult<List<Rental>>(_rentalDal.GetAll());
-        }
-
-        public IDataResult<List<RentalDetailDto>> GetRentalDetailsDto(int carId)
-        {
-            return new SuccessDataResult<List<RentalDetailDto>>(_rentalDal.GetRentalDetails(p=>p.CarId==carId));
-        }
-
-
     }
-}
+} 
+
+

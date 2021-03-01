@@ -1,6 +1,8 @@
 ﻿using Business.Abstract;
-using Business.Constants;
-using Core.Utilities.Results;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
@@ -11,24 +13,36 @@ namespace Business.Concrete
 {
     public class CustomerManager : ICustomerService
     {
-        ICustomerDal _customerDal;
-        public CustomerManager(ICustomerDal customerDal)
+        ICustomerDAL _customerDAL;
+        public CustomerManager(ICustomerDAL customerDAL)
         {
-            _customerDal = customerDal;
+            _customerDAL = customerDAL;
         }
+        [ValidationAspect(typeof(CustomerValidator))]
         public IResult Add(Customer customer)
         {
-            if (customer.CompanyName.Length<2)
-            {
-                return new ErrorResult(Messages.NameInvalid);
-            }
-            _customerDal.Add(customer);
-            return new SuccessResult(Messages.CustomerAdded);
+            _customerDAL.Add(customer);
+            return new SuccessResult();
         }
-
-        public IDataResult<List<Customer>> GetAll()
+        [ValidationAspect(typeof(CustomerValidator))]
+        public IResult Delete(Customer customer)
         {
-            return new SuccessDataResult<List<Customer>>(_customerDal.GetAll());
+            _customerDAL.Delete(customer);
+            return new SuccessResult();
+        }
+        [ValidationAspect(typeof(CustomerValidator))]
+        public IResult Update(Customer customer)
+        {
+            _customerDAL.Update(customer);
+            return new SuccessResult();
+        }
+        public IDataResult<List<Customer>> GetCustomers()
+        {
+            return new SuccessDataResult<List<Customer>>(_customerDAL.GetAll());
+        }
+        public IDataResult<Customer> GetById(int id)
+        {
+            return new SuccessDataResult<Customer>(_customerDAL.Get(c => c.Id == id));
         }
     }
 }
