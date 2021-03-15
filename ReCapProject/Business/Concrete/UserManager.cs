@@ -1,43 +1,48 @@
 ﻿using Business.Abstract;
-using Business.ValidationRules.FluentValidation;
-using Core.Aspects.Autofac.Validation;
-using Core.Utilities.Results.Abstract;
-using Core.Utilities.Results.Concrete;
+using Business.Constants;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
-using Core.Entities.Concrete;
+using Entities.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Business.Constants;
 
 namespace Business.Concrete
 {
     public class UserManager : IUserService
     {
-        IUserDAL _userDAL;
-
-        public UserManager(IUserDAL userDAL)
+        IUserDal _userDal;
+        public UserManager(IUserDal userDal)
         {
-            _userDAL = userDAL;
+            _userDal = userDal;
         }
 
-        public List<OperationClaim> GetClaims(User user)
+        public IResult Add(User user)
         {
-            return _userDAL.GetClaims(user);
+            _userDal.Add(user);
+            return new SuccessResult();
         }
 
-        public void Add(User user)
+        public IResult Update(User user)
         {
-            _userDAL.Add(user);
-            
+            _userDal.Update(user);
+            return new SuccessResult();
         }
 
-        public User GetByMail(string email)
+        public IResult Delete(User user)
         {
-            return _userDAL.Get(u => u.Email == email);
+            _userDal.Delete(user);
+            return new SuccessResult();
+        }
+
+        public IDataResult<List<User>> GetAll()
+        {
+            return new SuccessDataResult<List<User>>(_userDal.GetAll());
+        }
+
+        public IDataResult<User> GetById(int id)
+        {
+            return new SuccessDataResult<User>(_userDal.Get(u => u.Id == id));
         }
     }
 }
-
-
-

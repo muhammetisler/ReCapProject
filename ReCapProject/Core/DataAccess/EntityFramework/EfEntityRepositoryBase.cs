@@ -1,5 +1,4 @@
-﻿
-using Core.Entities;
+﻿using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,13 +8,14 @@ using System.Text;
 
 namespace Core.DataAccess.EntityFramework
 {
-   public class EfEntityRepositoryBase<TEntity,TContext>:IEntityRepository<TEntity>
-       where TEntity: class, IEntity, new()
-       where TContext:DbContext, new()
+    public class EfEntityRepositoryBase<TEntity, TContext> : IEntityRepository<TEntity>
+        where TEntity : class, IEntity, new()
+        where TContext : DbContext, new()
     {
-
         public void Add(TEntity entity)
         {
+            //IDısposable pattern implementation of c#
+            //using bitince içindekileri garbace collector bellekten temizliyor. Neden bunu kullandık çünkü context biraz maliyetli
             using (TContext context = new TContext())
             {
                 var addedEntity = context.Entry(entity);
@@ -34,7 +34,7 @@ namespace Core.DataAccess.EntityFramework
             }
         }
 
-        public TEntity Get(Expression<Func<TEntity, bool>> filter)
+        public TEntity Get(Expression<Func<TEntity, bool>> filter = null)
         {
             using (TContext context = new TContext())
             {
@@ -61,6 +61,5 @@ namespace Core.DataAccess.EntityFramework
                 context.SaveChanges();
             }
         }
-
     }
 }

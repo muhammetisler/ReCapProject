@@ -1,7 +1,6 @@
 ﻿using Business.Abstract;
 using Business.Constants;
-using Core.Utilities.Results.Abstract;
-using Core.Utilities.Results.Concrete;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
@@ -12,34 +11,37 @@ namespace Business.Concrete
 {
     public class BrandManager : IBrandService
     {
-        IBrandDAL _brandDAL;
-        public BrandManager(IBrandDAL brandDal)
+        IBrandDal _brandDal;
+        public BrandManager(IBrandDal brandDal)
         {
-            _brandDAL = brandDal;
+            _brandDal = brandDal;
         }
 
         public IResult Add(Brand brand)
         {
-            _brandDAL.Add(brand);
-            return new SuccessResult(Messages.Added);
-        }
-        public IResult Delete(Brand brand)
-        {
-            _brandDAL.Delete(brand);
-            return new SuccessResult(Messages.Deleted);
+            _brandDal.Add(brand);
+            return new SuccessResult();
         }
         public IResult Update(Brand brand)
         {
-            _brandDAL.Update(brand);
-            return new SuccessResult(Messages.Updated);
+            _brandDal.Update(brand);
+            return new SuccessResult();
         }
-        public IDataResult<List<Brand>> GetBrands()
+
+        public IResult Delete(Brand brand)
         {
-            return new SuccessDataResult<List<Brand>>(_brandDAL.GetAll());
+            _brandDal.Delete(brand);
+            return new SuccessResult();
         }
+
+        public IDataResult<List<Brand>> GetAll()
+        {
+            return new SuccessDataResult<List<Brand>>(_brandDal.GetAll());
+        }
+
         public IDataResult<Brand> GetById(int id)
         {
-            return new SuccessDataResult<Brand>(_brandDAL.Get(b => b.Id == id));
+            return new SuccessDataResult<Brand>(_brandDal.Get(b => b.Id == id));
         }
 
     }
